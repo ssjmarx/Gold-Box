@@ -25,10 +25,9 @@ class GoldBoxModule {
    * Register Foundry VTT hooks
    */
   registerHooks() {
-    // Register the setting that the config menu will use
+    // Register the setting that we use in chat button and config
     game.settings.register('gold-box', 'moduleElementsName', {
       name: "Module Elements Name",
-      hint: "Custom name for module elements in the UI",
       scope: "world",
       config: false,
       type: String,
@@ -82,8 +81,8 @@ class GoldBoxModule {
         const button = document.createElement('button');
         button.id = id;
         button.type = 'button';
-        button.setAttribute('data-tooltip', 'The Gold Box');
         button.innerHTML = inner;
+        button.setAttribute('data-tooltip', 'The Gold Box');
         
         button.addEventListener('click', () => {
           this.onTakeAITurn();
@@ -133,7 +132,7 @@ class GoldBoxModule {
     const dialog = new Dialog({
       title: 'The Gold Box',
       content: `
-        <h2>The Gold Box v0.1.9</h2>
+        <h2>The Gold Box v0.1.10</h2>
         <p>An AI-powered Foundry VTT module for intelligent TTRPG assistance.</p>
         <p><strong>Status:</strong> Basic structure loaded - AI features coming soon!</p>
         <p><a href="https://github.com/ssjmarx/Gold-Box" target="_blank">GitHub Repository</a></p>
@@ -152,7 +151,7 @@ class GoldBoxModule {
 }
 
 // Simple configuration handler for settings menu
-class GoldBoxConfig extends FormApplicationV2 {
+class GoldBoxConfig extends foundry.applications.api.ApplicationV2 {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       title: 'The Gold Box Configuration',

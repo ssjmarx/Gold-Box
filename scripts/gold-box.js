@@ -34,6 +34,9 @@ class GoldBoxModule {
     Hooks.on('renderSettings', (app, html, data) => {
       console.log('The Gold Box: renderSettings hook called');
       
+      // Wrap html with jQuery to use jQuery methods
+      const $html = $(html);
+      
       // Add a button to the settings menu - use jQuery to append to html
       const button = $('<button><i class="fas fa-robot"></i> The Gold Box</button>');
       button.css({
@@ -50,13 +53,13 @@ class GoldBoxModule {
       });
       
       // Find the settings menu container and add the button
-      const settingsMenu = html.find('#settings-game') || html.find('#settings') || html.find('.settings-list');
+      const settingsMenu = $html.find('#settings-game') || $html.find('#settings') || $html.find('.settings-list');
       if (settingsMenu.length) {
         settingsMenu.append(button);
         console.log('The Gold Box: Adding button to settings menu');
       } else {
         console.error('The Gold Box: Could not find settings menu');
-        console.log('The Gold Box: Available elements:', html[0].outerHTML.substring(0, 200));
+        console.log('The Gold Box: Available elements:', $html[0].outerHTML.substring(0, 200));
       }
     });
 
@@ -82,6 +85,9 @@ class GoldBoxModule {
    */
   addChatControls(html) {
     console.log('The Gold Box: addChatControls called');
+    
+    // Wrap html with jQuery to use jQuery methods
+    const $html = $(html);
     
     // Create a controls container using jQuery
     const controlsDiv = $('<div class="gold-box-controls"></div>');
@@ -109,16 +115,16 @@ class GoldBoxModule {
     controlsDiv.append(aiButton);
     
     // Find the chat controls container and add our button after it
-    const chatControls = html.find('.chat-controls') || html.find('.chat') || html.find('#chat');
+    const chatControls = $html.find('.chat-controls') || $html.find('.chat') || $html.find('#chat');
     if (chatControls.length) {
       chatControls.after(controlsDiv);
       console.log('The Gold Box: Found chat controls, adding button');
     } else {
       console.error('The Gold Box: Could not find chat controls');
-      console.log('The Gold Box: Available elements:', html[0].outerHTML.substring(0, 300));
+      console.log('The Gold Box: Available elements:', $html[0].outerHTML.substring(0, 300));
       
       // As a fallback, try to add to the main html element
-      html.append(controlsDiv);
+      $html.append(controlsDiv);
       console.log('The Gold Box: Added button as fallback');
     }
   }

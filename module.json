@@ -18,6 +18,9 @@
     "./packs/**/*",
     "./templates/**/*"
   ],
+  "templates": [
+    "./templates/gold-box-config.html"
+  ],
   "esmodules": [
     "scripts/gold-box.js"
   ],

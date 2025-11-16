@@ -25,150 +25,86 @@ class GoldBoxModule {
    * Register Foundry VTT hooks
    */
   registerHooks() {
-    // Hook when the game is ready
+    // Register settings menu using ChatConsole pattern
+    game.settings.registerMenu('gold-box', 'configMenu', {
+      name: "The Gold Box Configuration",
+      label: "Open Gold Box Config",
+      hint: "Configure The Gold Box module settings",
+      scope: "world",
+      config: true,
+      restricted: true,
+      requiresReload: false,
+      icon: "fas fa-robot",
+      type: GoldBoxConfig
+    });
+
+    // Hook when game is ready
     Hooks.once('ready', () => {
       console.log('The Gold Box: Game is ready');
-      
-      // Add buttons after DOM is fully loaded
-      this.addSettingsButton();
-      this.addChatButton();
+    });
+
+    // Hook to add chat button when sidebar tab is rendered
+    Hooks.on('renderSidebarTab', (app, html, data) => {
+      if (app.options.id === 'chat') {
+        this.addChatButton(html);
+      }
     });
   }
 
   /**
-   * Add settings button to the settings menu
+   * Add chat button to the chat sidebar using ChatConsole pattern
    */
-  addSettingsButton() {
+  addChatButton(html) {
+    console.log('The Gold Box: addChatButton called');
+    
     try {
-      // Wait a bit for DOM to be ready
-      setTimeout(() => {
-        // Look for the settings tab button and add our button next to it
-        const settingsTab = $('a[data-tab="settings"]');
-        if (settingsTab.length > 0) {
-          const button = $('<button><i class="fas fa-robot"></i> The Gold Box</button>');
-          button.css({
-            'margin': '0 0.25rem',
-            'padding': '0.5rem 1rem',
-            'background': '#4a5568',
-            'color': 'white',
-            'border': 'none',
-            'border-radius': '0.25rem',
-            'cursor': 'pointer',
-            'font-size': '0.9rem'
-          });
-          button.click(() => {
-            this.showModuleInfo();
-          });
-          
-          // Insert after the settings tab
-          settingsTab.after(button);
-          console.log('The Gold Box: Added settings button using ready hook');
+      const id = 'gold-box-launcher';
+      const rendered = document.getElementById(id);
+      const customName = game.settings.get('gold-box', 'moduleElementsName');
+      let name = customName ? customName : 'The Gold Box';
+      
+      // Build button HTML
+      const inner = `<i class="fas fa-robot"></i> ${name}`;
+      
+      // Use ChatConsole's proven approach for v13+
+      if (game.release.generation >= 13) {
+        // Create button using DOM manipulation for v13
+        const button = (() => {
+          let btn = document.createElement('button');
+          btn.innerHTML = `<button id="${id}" type="button" data-tooltip="The Gold Box">${inner}</button>`;
+          return btn.firstChild;
+        })();
+        
+        button.addEventListener('click', () => {
+          this.onTakeAITurn();
+        });
+        
+        // Find chat form and prepend button
+        const chatForm = document.getElementsByClassName('chat-form')[0];
+        if (chatForm) {
+          chatForm.prepend(button);
+          console.log('The Gold Box: Added chat button using v13 pattern');
         } else {
-          console.error('The Gold Box: Could not find settings tab');
+          console.error('The Gold Box: Could not find chat form');
         }
-      }, 1000);
-    } catch (error) {
-      console.error('The Gold Box: Error adding settings button:', error);
-    }
-  }
-
-  /**
-   * Add chat button to the chat sidebar
-   */
-  addChatButton() {
-    try {
-      // Wait a bit for DOM to be ready
-      setTimeout(() => {
-        // Look for the chat tab and add our button
-        const chatTab = $('a[data-tab="chat"]');
-        if (chatTab.length > 0) {
-          const controlsDiv = $('<div class="gold-box-controls"></div>');
-          controlsDiv.css({
-            'margin': '0.5rem',
-            'padding': '0.5rem',
-            'border-top': '1px solid #ccc'
-          });
-          
-          const aiButton = $('<button><i class="fas fa-play"></i> Take AI Turn</button>');
-          aiButton.css({
-            'background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'color': 'white',
-            'border': 'none',
-            'padding': '0.5rem 1rem',
-            'border-radius': '0.25rem',
-            'cursor': 'pointer',
-            'width': '100%',
-            'font-size': '0.9rem'
-          });
-          aiButton.click(() => {
-            this.onTakeAITurn();
-          });
-          
-          controlsDiv.append(aiButton);
-          
-          // Find the chat form and add our button before it
-          const chatForm = chatTab.closest('.sidebar-tab').find('form');
-          if (chatForm.length > 0) {
-            chatForm.before(controlsDiv);
-            console.log('The Gold Box: Added chat button using ready hook');
-          } else {
-            console.error('The Gold Box: Could not find chat form');
-          }
+      } else {
+        // Fallback for older versions using jQuery
+        const $html = $(html);
+        const $button = $(`<button id="${id}" data-tooltip="The Gold Box">${inner}</button>`);
+        $button.click(() => {
+          this.onTakeAITurn();
+        });
+        
+        const chatControls = $html.find('#chat-controls');
+        if (chatControls.length) {
+          chatControls.after($button);
+          console.log('The Gold Box: Added chat button using v12 pattern');
         } else {
-          console.error('The Gold Box: Could not find chat tab');
+          console.error('The Gold Box: Could not find chat controls');
         }
-      }, 1500);
+      }
     } catch (error) {
       console.error('The Gold Box: Error adding chat button:', error);
-    }
-  }
-
-  /**
-   * Add AI controls to the chat sidebar
-   */
-  addChatControls(html) {
-    console.log('The Gold Box: addChatControls called');
-    
-    // Wrap html with jQuery to use jQuery methods
-    const $html = $(html);
-    
-    // Create a controls container using jQuery
-    const controlsDiv = $('<div class="gold-box-controls"></div>');
-    controlsDiv.css({
-      'margin-top': '10px',
-      'padding': '10px',
-      'border-top': '1px solid #ccc'
-    });
-    
-    // Create an AI turn button using jQuery
-    const aiButton = $('<button><i class="fas fa-play"></i> Take AI Turn</button>');
-    aiButton.css({
-      'background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      'color': 'white',
-      'border': 'none',
-      'padding': '8px 16px',
-      'border-radius': '4px',
-      'cursor': 'pointer',
-      'width': '100%'
-    });
-    aiButton.click(() => {
-      this.onTakeAITurn();
-    });
-    
-    controlsDiv.append(aiButton);
-    
-    // Find the chat controls container and add our button after it
-    const chatControls = $html.find('.chat-sidebar') || $html.find('#chat') || $html.find('.chat');
-    if (chatControls.length) {
-      chatControls.after(controlsDiv);
-      console.log('The Gold Box: Found chat controls, adding button');
-    } else {
-      console.error('The Gold Box: Could not find chat controls');
-      console.log('The Gold Box: Available elements:', $html[0].outerHTML.substring(0, 300));
-      
-      // As a fallback, try to add to the main html element
-      $html.append(controlsDiv);
-      console.log('The Gold Box: Added button as fallback');
     }
   }
 
@@ -203,6 +139,31 @@ class GoldBoxModule {
     
     dialog.render(true);
   }
+}
+
+// Simple configuration handler for settings menu
+class GoldBoxConfig extends FormApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      title: 'The Gold Box Configuration',
+      id: 'gold-box-config',
+      template: 'templates/gold-box-config.html'
+      width: 400,
+      height: 300
+    });
+  }
+
+  getData() {
+    return {
+      moduleElementsName: game.settings.get('gold-box', 'moduleElementsName') || 'The Gold Box'
+    };
+  }
+
+  async _updateObject(event, formData) {
+    await game.settings.set('gold-box', 'moduleElementsName', formData.moduleElementsName);
+    ui.notifications.info('The Gold Box settings updated!');
+  }
+}
 
   /**
    * Clean up when the module is disabled

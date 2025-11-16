@@ -31,23 +31,23 @@ class GoldBoxModule {
     });
 
     // Hook when settings are rendered
-    Hooks.on('renderSettings', (app, html) => {
+    Hooks.on('renderSettings', (app, html, data) => {
       // Add a button to the settings menu
-      const button = $(`
-        <button>
-          <i class="fas fa-robot"></i> The Gold Box
-        </button>
-      `);
-      
-      button.click(() => {
+      const button = document.createElement('button');
+      button.innerHTML = '<i class="fas fa-robot"></i> The Gold Box';
+      button.style.margin = '0.25rem';
+      button.addEventListener('click', () => {
         this.showModuleInfo();
       });
       
-      html.find('#settings-game').append(button);
+      const settingsGame = html.querySelector('#settings-game');
+      if (settingsGame) {
+        settingsGame.appendChild(button);
+      }
     });
 
     // Hook when the sidebar is rendered
-    Hooks.on('renderSidebarTab', (app, html) => {
+    Hooks.on('renderSidebarTab', (app, html, data) => {
       if (app.options.id === 'chat') {
         // Add AI controls to chat sidebar
         this.addChatControls(html);
@@ -59,19 +59,25 @@ class GoldBoxModule {
    * Add AI controls to the chat sidebar
    */
   addChatControls(html) {
-    const aiButton = $(`
-      <div class="gold-box-controls">
-        <button class="gold-box-ai-turn">
-          <i class="fas fa-play"></i> Take AI Turn
-        </button>
-      </div>
-    `);
+    // Create the controls container
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'gold-box-controls';
     
-    aiButton.find('.gold-box-ai-turn').click(() => {
+    // Create the AI turn button
+    const aiButton = document.createElement('button');
+    aiButton.className = 'gold-box-ai-turn';
+    aiButton.innerHTML = '<i class="fas fa-play"></i> Take AI Turn';
+    aiButton.addEventListener('click', () => {
       this.onTakeAITurn();
     });
     
-    html.find('.chat-controls').after(aiButton);
+    controlsDiv.appendChild(aiButton);
+    
+    // Find the chat controls and add our button after it
+    const chatControls = html.querySelector('.chat-controls');
+    if (chatControls) {
+      chatControls.parentNode.insertBefore(controlsDiv, chatControls.nextSibling);
+    }
   }
 
   /**

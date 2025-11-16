@@ -34,27 +34,29 @@ class GoldBoxModule {
     Hooks.on('renderSettings', (app, html, data) => {
       console.log('The Gold Box: renderSettings hook called');
       
-      // Add a button to the settings menu - use app's HTML element
-      const button = document.createElement('button');
-      button.innerHTML = '<i class="fas fa-robot"></i> The Gold Box';
-      button.style.margin = '0.25rem';
-      button.style.padding = '0.5rem 1rem';
-      button.style.background = '#4a5568';
-      button.style.color = 'white';
-      button.style.border = 'none';
-      button.style.borderRadius = '0.25rem';
-      button.style.cursor = 'pointer';
-      button.addEventListener('click', () => {
+      // Add a button to the settings menu - use jQuery to append to html
+      const button = $('<button><i class="fas fa-robot"></i> The Gold Box</button>');
+      button.css({
+        'margin': '0.25rem',
+        'padding': '0.5rem 1rem',
+        'background': '#4a5568',
+        'color': 'white',
+        'border': 'none',
+        'border-radius': '0.25rem',
+        'cursor': 'pointer'
+      });
+      button.click(() => {
         this.showModuleInfo();
       });
       
-      // Try to add to the settings app's element
-      if (app.element && app.element.length) {
-        app.element[0].appendChild(button);
-        console.log('The Gold Box: Adding button to settings app element');
+      // Find the settings menu container and add the button
+      const settingsMenu = html.find('#settings-game') || html.find('#settings') || html.find('.settings-list');
+      if (settingsMenu.length) {
+        settingsMenu.append(button);
+        console.log('The Gold Box: Adding button to settings menu');
       } else {
-        console.error('The Gold Box: Could not find app element');
-        console.log('The Gold Box: App object:', app);
+        console.error('The Gold Box: Could not find settings menu');
+        console.log('The Gold Box: Available elements:', html[0].outerHTML.substring(0, 200));
       }
     });
 
@@ -80,47 +82,43 @@ class GoldBoxModule {
    */
   addChatControls(html) {
     console.log('The Gold Box: addChatControls called');
-    console.log('The Gold Box: HTML element:', html.tagName || html.constructor.name);
     
-    // Create the controls container
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'gold-box-controls';
-    controlsDiv.style.marginTop = '10px';
-    controlsDiv.style.padding = '10px';
-    controlsDiv.style.borderTop = '1px solid #ccc';
+    // Create a controls container using jQuery
+    const controlsDiv = $('<div class="gold-box-controls"></div>');
+    controlsDiv.css({
+      'margin-top': '10px',
+      'padding': '10px',
+      'border-top': '1px solid #ccc'
+    });
     
-    // Create the AI turn button
-    const aiButton = document.createElement('button');
-    aiButton.className = 'gold-box-ai-turn';
-    aiButton.innerHTML = '<i class="fas fa-play"></i> Take AI Turn';
-    aiButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    aiButton.style.color = 'white';
-    aiButton.style.border = 'none';
-    aiButton.style.padding = '8px 16px';
-    aiButton.style.borderRadius = '4px';
-    aiButton.style.cursor = 'pointer';
-    aiButton.style.width = '100%';
-    aiButton.addEventListener('click', () => {
+    // Create an AI turn button using jQuery
+    const aiButton = $('<button><i class="fas fa-play"></i> Take AI Turn</button>');
+    aiButton.css({
+      'background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'color': 'white',
+      'border': 'none',
+      'padding': '8px 16px',
+      'border-radius': '4px',
+      'cursor': 'pointer',
+      'width': '100%'
+    });
+    aiButton.click(() => {
       this.onTakeAITurn();
     });
     
-    controlsDiv.appendChild(aiButton);
+    controlsDiv.append(aiButton);
     
-    // Try multiple selectors for chat container
-    let chatContainer = html.querySelector('.chat-controls') ||
-                      html.querySelector('.chat') ||
-                      html.querySelector('#chat') ||
-                      html.querySelector('.sidebar-tab');
-    
-    if (chatContainer) {
-      console.log('The Gold Box: Found chat container, adding button');
-      chatContainer.parentNode.insertBefore(controlsDiv, chatContainer.nextSibling);
+    // Find the chat controls container and add our button after it
+    const chatControls = html.find('.chat-controls') || html.find('.chat') || html.find('#chat');
+    if (chatControls.length) {
+      chatControls.after(controlsDiv);
+      console.log('The Gold Box: Found chat controls, adding button');
     } else {
-      console.error('The Gold Box: Could not find chat container');
-      console.log('The Gold Box: Available elements:', html.innerHTML.substring(0, 300));
+      console.error('The Gold Box: Could not find chat controls');
+      console.log('The Gold Box: Available elements:', html[0].outerHTML.substring(0, 300));
       
       // As a fallback, try to add to the main html element
-      html.appendChild(controlsDiv);
+      html.append(controlsDiv);
       console.log('The Gold Box: Added button as fallback');
     }
   }

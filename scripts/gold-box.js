@@ -53,7 +53,7 @@ class GoldBoxModule {
       });
       
       // Find the settings menu container and add the button
-      const settingsMenu = $html.find('#settings-game') || $html.find('#settings') || $html.find('.settings-list');
+      const settingsMenu = $html.find('.settings-sidebar') || $html.find('#settings') || $html.find('.settings-list');
       if (settingsMenu.length) {
         settingsMenu.append(button);
         console.log('The Gold Box: Adding button to settings menu');
@@ -115,7 +115,7 @@ class GoldBoxModule {
     controlsDiv.append(aiButton);
     
     // Find the chat controls container and add our button after it
-    const chatControls = $html.find('.chat-controls') || $html.find('.chat') || $html.find('#chat');
+    const chatControls = $html.find('.chat-sidebar') || $html.find('#chat') || $html.find('.chat');
     if (chatControls.length) {
       chatControls.after(controlsDiv);
       console.log('The Gold Box: Found chat controls, adding button');
